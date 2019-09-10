@@ -86,7 +86,7 @@ def provisionAnsible(environmentName) {
         keyVaultURLOverride: "https://infra-cert-nonprod.vault.azure.net"
         ) {
             sh('git clone -b ubuntu git@github.com:hmcts/curator-role.git /tmp/ansible')
-            sh('ansible-playbook --ssh-extra-args="-o StrictHostKeyChecking=no" --private-key $ELK_PRIVATE_KEY --extra-vars elasticsearch_admin_username=${ELK_USER} --extra-vars elasticsearch_admin_password=${ELK_PASSWORD}' -i /tmp/inventory /tmp/ansible/curator-role/main.yml')
+                sh('ansible-playbook --ssh-extra-args="-o StrictHostKeyChecking=no" --private-key ${ELK_PRIVATE_KEY} --extra-vars elasticsearch_admin_username=${ELK_USER} --extra-vars elasticsearch_admin_password=${ELK_PASSWORD} -i /tmp/inventory /tmp/ansible/curator-role/main.yml')
         }
     }
 }
