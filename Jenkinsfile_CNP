@@ -12,6 +12,21 @@ properties([
         ])
 ])
 
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+    [ 
+      secretType: 'Secret',
+      name: secretName,
+      version: '',
+      envVariable: envVar
+    ]
+}
+
+def secrets = [
+secret('elk-private-key', 'ELK_PRIVATE_KEY'), 
+secret('elk-admin-user', 'ELK_USER'),
+secret('elk-admin-password', 'ELK_PASSWORD')
+]
+
 if (params.DEPLOY_ES_CLUSTER == true) {
     withInfraPipeline(params.PRODUCT_NAME) {
         onMaster {
@@ -62,4 +77,14 @@ def healthCheckUrl(subscription, environmentName) {
     es_url = keyVault.find("ccd-ELASTIC-SEARCH-URL").trim()
     echo "retrieved ES URL: ${es_url}"
     "http://" + es_url + ":9200/_cluster/health"
+}
+
+stage('Ansible Curator Playbook') {
+      withAzureKeyvault(
+      azureKeyVaultSecrets: secrets,
+      keyVaultURLOverride: "https://infra-cert-nonprod.vault.azure.net"
+    ) {
+        sh('git clone -b ubuntu git@github.com:hmcts/curator-role.git /tmp/ansible')
+        sh('ansible-playbook --ssh-extra-args="-o StrictHostKeyChecking=no" --private-key $ELK_PRIVATE_KEY --extra-vars='{"elasticsearch_admin_username": "$ELK_USER", "elasticsearch_admin_password":"$ELK_PASSWORD"}' -i /tmp/inventory /tmp/ansible/curator-role/main.yml')
+      }
 }
