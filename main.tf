@@ -13,19 +13,8 @@ provider "azurerm" {
   subscription_id = "${var.mgmt_subscription_id}"
 }
 
-provider "azurerm" {
-  alias           = "aks-infra"
-  subscription_id = "${var.aks_infra_subscription_id}"
-  skip_provider_registration = true
-}
-
-provider "azurerm" {
-  alias           = "mgmt"
-  subscription_id = "${var.mgmt_subscription_id}"
-}
-
 module "elastic" {
-  source = "git@github.com:hmcts/cnp-module-elk.git?ref=RDM-6000"
+  source = "git@github.com:hmcts/cnp-module-elk.git?ref=master"
   product = "${var.product}"
   location = "${var.location}"
   env = "${var.env}"
